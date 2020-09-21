@@ -13,9 +13,10 @@ ADAPTIVE_THRESH_WEIGHT = 9
 
 
 def main(imgName, numberOfCar):
+	
 	img = cv2.imread(imgName)
 	realImage = img.copy()
-	showSteps = False
+	showSteps = True
 
 	startx = time.time()
 
@@ -91,9 +92,11 @@ def main(imgName, numberOfCar):
 	################################################################################
 	if showSteps == True:
 		detectChars.drawPureCont(remainContours,img,"beforFindPossible")
-	
-	remainContoursClass = detectChars.findPossibleChar(contoursAsClass)
 
+	possibstart = time.time()
+	remainContoursClass = detectChars.findPossibleChar(contoursAsClass)
+	possibstop = time.time()
+	print(" possib takes", possibstop - possibstart)
 	
 
 	###############################################################################
@@ -121,9 +124,10 @@ def main(imgName, numberOfCar):
 
 
 
-
+	houghstart = time.time()
 	houghMatchedContPos = detectChars.houghAlgor(contoursAsClass, black_image_2)#,detectChars.drawPureCont(remainContours,img,1))
-	
+	houghstop = time.time()
+	print("hough takes", houghstop-houghstart)
 
 	savePath = "E:\\licensePlate\\results\\car{}".format(numberOfCar)
 	#savePath = "results\\{}".format(imgName[:-4])
@@ -131,16 +135,19 @@ def main(imgName, numberOfCar):
 		os.mkdir(savePath)
 	except OSError:
 		pass
+		
 	#cv2.imwrite(savePath+"/{}_0.jpg".format(savePath[-5:]),img)
-	listOfPossibleLicensePlates = detectChars.findMatchedCont(contoursAsClass,houghMatchedContPos,black_image_2, savePath, saveImg = False,showSteps = False)  # returns list of possible plate as class contour
+	listOfPossibleLicensePlates = detectChars.findMatchedCont(contoursAsClass,houghMatchedContPos,black_image_2, savePath, saveImg = False,showSteps = True)  # returns list of possible plate as class contour
 	print("--------",len(listOfPossibleLicensePlates))
 	#####print(len(listOfPossibleLicensePlates))
 	resultPlates = detectChars.extractLicensePLates(listOfPossibleLicensePlates, img, realImage,scale_percent, imageScaled,numberOfCar, showSteps = False)
+	stopx = time.time()
 	
-
+	print("whole", stopx-startx)
+	startTess = time.time()
 	showPlates = True
 	savePlates = False
-	extractChars = True
+	extractChars = False
 
 	lastPlatesString = ""
 	lastPlatesList = []
@@ -157,7 +164,9 @@ def main(imgName, numberOfCar):
 			print("plate {} is".format(counter), text)
 			counter += 1
 		if showPlates == True:
-			cv2.imshow("main img", scaled)	
+			cv2.imshow("main img", scaled)
+			stopTess = time.time()
+			print("tesseract takes", stopTess - startTess)	
 		cv2.waitKey(0)
 		cv2.destroyAllWindows()
 
@@ -171,7 +180,6 @@ def main(imgName, numberOfCar):
 			lastPlatesString += "," + text
 			print("plate {} is".format(counter), text)
 			counter += 1
-	stopx = time.time()
 
 	######print("Whole process takes",(stopx-startx), "seconds.")
 	return manipulationOnResult(lastPlatesList)
@@ -231,9 +239,10 @@ def manipulationOnResult(lic_plates):
 	#print(result)
 	return lastres
 if __name__ == "__main__":
-	imgs = os.listdir("photos2\\")
-	for img in imgs:
-		img = "photos2\\"+img
+	imgs = os.listdir("photos1\\")
+	for img in imgs[:4]:
+		img = "photos1\\"+img
+		
 		plates = main(img, 0)
-
+		
 

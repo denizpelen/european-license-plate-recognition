@@ -30,7 +30,7 @@ def findMatchedCont(listOfContours, MatchedPositions, img, path, saveImg= False,
 					contours0.append(cont)
 					classList.append(cont)
 					if showSteps == True:
-						cv2.drawContours(newimg, cont.contour, 0, (255,0,0), 1)
+						cv2.drawContours(newimg, cont.contour, 0, (0,0,255), 1)
 		#now mathced contours are stored in listOfMatchedContours
 
 		# end of for
@@ -52,13 +52,13 @@ def findMatchedCont(listOfContours, MatchedPositions, img, path, saveImg= False,
 					cv2.imshow("result of hough and matching", newimg)
 					cv2.waitKey(0)
 					cv2.destroyAllWindows()	
-				"""	
-				if saveImg == True and showSteps == True:
+					
+				if saveImg == True :
 					for i in contours:
 						cv2.drawContours(newimg, i.contour, 0, (0,255,0),1)
 					fileName = path + "/{}_{}.jpg".format(path[-5:],counter)
 					counter += 1
-					cv2.imwrite(fileName, newimg)"""
+					cv2.imwrite(fileName, newimg)
 
 		if len(contours) >3 and canBeLicPlate(contours):
 			listOfMatchedContours.append(removeRepeatingCont(contours))

@@ -5,6 +5,8 @@ import time
 import os 
 import pytesseract
 import csv
+import random
+
 
 GAUSSIAN_SMOOTH_FILTER_SIZE = (5,5)
 ADAPTIVE_THRESH_BLOCK_SIZE = 19
@@ -12,8 +14,18 @@ ADAPTIVE_THRESH_WEIGHT = 9
 
 
 
+
 def main(imgName, numberOfCar):
 	
+	savePath = "E:\\licensePlate\\results\\car{}".format(numberOfCar)
+	houghPath = "E:\\licensePlate\\houghResults\\car{}".format(numberOfCar)
+	try:
+		os.mkdir(savePath)
+		os.mkdir(houghPath)
+	except OSError:
+		print("cannot create the path")
+		pass
+
 	img = cv2.imread(imgName)
 	realImage = img.copy()
 	showSteps = True
@@ -22,6 +34,8 @@ def main(imgName, numberOfCar):
 
 	imageScaled = False
 	scale_percent = 100
+
+
 
 	scale_img = True
 
@@ -101,7 +115,7 @@ def main(imgName, numberOfCar):
 
 	###############################################################################
 	if showSteps == True:
-		detectChars.drawPureCont(contoursAsClass,img,1, True, isClass =True)
+		detectChars.drawPureCont(remainContoursClass,img,198989, True, isClass =True)
 
 
 	######### draw contours ########
@@ -126,28 +140,49 @@ def main(imgName, numberOfCar):
 
 	houghstart = time.time()
 	houghMatchedContPos = detectChars.houghAlgor(contoursAsClass, black_image_2)#,detectChars.drawPureCont(remainContours,img,1))
+	"""houghResultImage = []
+	houghCounter = 0	
+	for group in houghMatchedContPos:
+		if len(group) > 2:
+			houghResultImage.append(np.zeros((w,h,3), np.uint8))
+			intRandomBlue = random.randint(100, 255)
+			intRandomGreen = random.randint(100, 255)
+			intRandomRed = random.randint(100, 255)
+			for pos1 in group:
+				for cont in contoursAsClass:
+					if cont.position == pos1:
+						cv2.drawContours(houghResultImage[houghCounter], cont.contour, 0, (intRandomBlue,intRandomGreen,intRandomRed), 1)
+			houghCounter += 1			
+				
+	for res in houghResultImage:
+		
+		#cv2.imshow("houghResultImage {}".format(houghCounter),res)	
+		fileName = houghPath + "/{}_{}.jpg".format(savePath[-5:],houghCounter)
+
+		cv2.imwrite(fileName, res)	
+		houghCounter -= 1
+	cv2.waitKey(0)
+	cv2.destroyAllWindows()"""
+
 	houghstop = time.time()
 	print("hough takes", houghstop-houghstart)
 
-	savePath = "E:\\licensePlate\\results\\car{}".format(numberOfCar)
+	
 	#savePath = "results\\{}".format(imgName[:-4])
-	try:
-		os.mkdir(savePath)
-	except OSError:
-		pass
+
 		
 	#cv2.imwrite(savePath+"/{}_0.jpg".format(savePath[-5:]),img)
-	listOfPossibleLicensePlates = detectChars.findMatchedCont(contoursAsClass,houghMatchedContPos,black_image_2, savePath, saveImg = False,showSteps = True)  # returns list of possible plate as class contour
+	listOfPossibleLicensePlates = detectChars.findMatchedCont(contoursAsClass,houghMatchedContPos,black_image_2, savePath, saveImg = False,showSteps = False)  # returns list of possible plate as class contour
 	print("--------",len(listOfPossibleLicensePlates))
 	#####print(len(listOfPossibleLicensePlates))
-	resultPlates = detectChars.extractLicensePLates(listOfPossibleLicensePlates, img, realImage,scale_percent, imageScaled,numberOfCar, showSteps = False)
+	resultPlates = detectChars.extractLicensePLates(listOfPossibleLicensePlates, img, realImage,scale_percent, imageScaled,numberOfCar, showSteps = True)
 	stopx = time.time()
 	
 	print("whole", stopx-startx)
 	startTess = time.time()
 	showPlates = True
 	savePlates = False
-	extractChars = False
+	extractChars = True
 
 	lastPlatesString = ""
 	lastPlatesList = []
@@ -239,10 +274,10 @@ def manipulationOnResult(lic_plates):
 	#print(result)
 	return lastres
 if __name__ == "__main__":
-	imgs = os.listdir("photos1\\")
-	for img in imgs[:4]:
-		img = "photos1\\"+img
+	imgs = os.listdir("photos3\\")
+	for img in imgs[:1]:
+		img = "photos3\\"+img
 		
-		plates = main(img, 0)
+		plates = main(img, 1001)
 		
 
